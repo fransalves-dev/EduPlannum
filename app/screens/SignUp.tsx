@@ -1,13 +1,20 @@
 import {
-  Avatar,
+  faEnvelope,
+  faEye,
+  faEyeSlash,
+} from '@fortawesome/free-regular-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import {
   Box,
   Button,
   ButtonText,
   Center,
   FormControl,
   Image,
+  ImageBackground,
   Input,
   InputField,
+  InputSlot,
   Spinner,
   Text,
   VStack,
@@ -17,10 +24,17 @@ import React, { useState } from 'react';
 import { FIREBASE_AUTH } from '../../FirebaseConfig';
 import { RouterProps } from '../../types/routerProps';
 const SignUpPage = ({ navigation }: RouterProps) => {
-  var Logo = require('../assets/img/Logo.png');
+  var Logo = require('../assets/img/Logo_Novo.png');
+  var Background = require('../assets/img/Background_Novo.png');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const handleState = () => {
+    setShowPassword((showState) => {
+      return !showState;
+    });
+  };
   const auth = FIREBASE_AUTH;
 
   const signUp = async () => {
@@ -40,96 +54,153 @@ const SignUpPage = ({ navigation }: RouterProps) => {
     }
   };
   return (
-    <Box bgColor="white">
-      <Center marginTop={30}>
-        <Avatar bgColor="white" h={175} w={188}>
-          <Image source={Logo} h={170} w={181} alt="Logo" />
-        </Avatar>
-        <Center bgColor="white" w="90%" position="relative" bottom={40}>
-          <Text fontFamily="Inter Semibold" color="#000000" fontSize={24}>
-            eduPlannum
-          </Text>
+    <Box bgColor="blue" h="100%">
+      <ImageBackground source={Background} h="100%">
+        <Center marginTop={30} position="relative" top={40} zIndex={10}>
+          <Image source={Logo} h={220} w={250} alt="Logo" />
         </Center>
-      </Center>
-      <Center>
-        <Text color="#000000" fontSize={18}>
-          Faça seu cadastro
-        </Text>
-      </Center>
-      <FormControl bgColor="white" h="100%">
-        <Center>
-          <VStack w={320}>
-            <VStack space="xs">
-              <Text
-                fontSize={18}
-                fontFamily="Inter Semibold"
-                color="#000000"
-                marginLeft={25}
-              >
-                Email
-              </Text>
-              <Input
-                variant="rounded"
-                bgColor="white"
-                h={48}
-                padding={10}
-                borderColor="#545454"
-              >
-                <InputField
-                  value={email}
-                  onChangeText={(text) => setEmail(text)}
-                  type="text"
-                  placeholder="Digite seu email para cadastro"
-                  placeholderTextColor="#545454"
-                />
-              </Input>
-            </VStack>
 
-            <VStack space="xs" marginTop={20}>
-              <Text
-                fontSize={18}
-                fontFamily="Inter Semibold"
-                color="#000000"
-                marginLeft={25}
-              >
-                Senha
+        <FormControl
+          bgColor="#F5F5DC"
+          position="relative"
+          bottom={40}
+          marginHorizontal={26}
+          borderRadius={6}
+          paddingTop={50}
+        >
+          <Center marginVertical={30} marginHorizontal={14} flexDirection="row">
+            <Text
+              textAlign="center"
+              fontSize={18}
+              color="#212121"
+              fontFamily="Inter Semibold"
+            >
+              Faça sua conta e comece a planejar com{' '}
+              <Text fontSize={18} fontFamily="Inter Semibold" color="#8a2be2">
+                edu.
               </Text>
-              <Input
-                variant="rounded"
-                bgColor="white"
-                h={48}
-                padding={10}
-                borderColor="#545454"
-              >
-                <InputField
-                  value={password}
-                  onChangeText={(text) => setPassword(text)}
-                  type="password"
-                  placeholder="Digite uma senha"
-                  placeholderTextColor="#545454"
-                />
-              </Input>
-              <Center marginTop={20}>
-                {loading ? (
-                  <Spinner size="small" />
-                ) : (
-                  <Button w="50%" bgColor="black" onPress={() => signUp()}>
-                    <ButtonText>Cadastrar</ButtonText>
-                  </Button>
-                )}
-                <Button
-                  marginTop={20}
-                  w="50%"
-                  bgColor="black"
-                  onPress={() => navigation.navigate('Login')}
+            </Text>
+          </Center>
+          <Center>
+            <VStack w={320}>
+              <VStack space="xs">
+                <Text
+                  fontSize={18}
+                  fontFamily="Inter Regular"
+                  color="#8a2be2"
+                  marginLeft={25}
                 >
-                  <ButtonText>Voltar</ButtonText>
-                </Button>
-              </Center>
+                  E-mail
+                </Text>
+                <Input
+                  variant="rounded"
+                  bgColor="#E4E9DD"
+                  h={48}
+                  padding={10}
+                  borderColor="#545454"
+                >
+                  <InputSlot marginLeft={10}>
+                    <FontAwesomeIcon
+                      icon={faEnvelope}
+                      size={20}
+                      style={{ color: '#284060' }}
+                    />
+                  </InputSlot>
+
+                  <InputField
+                    paddingLeft={8}
+                    value={email}
+                    onChangeText={(text) => setEmail(text)}
+                    type="text"
+                    placeholder="Digite seu email"
+                    fontFamily="Inter Regular"
+                    placeholderTextColor="#284060"
+                  />
+                </Input>
+              </VStack>
+
+              <VStack space="xs" marginTop={20}>
+                <Text
+                  fontSize={18}
+                  fontFamily="Inter Regular"
+                  color="#8a2be2"
+                  marginLeft={25}
+                >
+                  Senha
+                </Text>
+                <Input
+                  variant="rounded"
+                  bgColor="#E4E9DD"
+                  h={48}
+                  padding={10}
+                  borderColor="#545454"
+                >
+                  <InputSlot marginLeft={10} onPress={handleState}>
+                    <FontAwesomeIcon
+                      icon={showPassword ? faEye : faEyeSlash}
+                      size={20}
+                      style={{ color: '#284060' }}
+                    />
+                  </InputSlot>
+                  <InputField
+                    paddingLeft={8}
+                    fontFamily="Inter Regular"
+                    type={showPassword ? 'text' : 'password'}
+                    onChangeText={(text) => setPassword(text)}
+                    placeholder="Digite sua senha"
+                    placeholderTextColor="#284060"
+                  />
+                </Input>
+                <Center marginTop={37}>
+                  <Button w="50%" bgColor="#212121" onPress={() => signUp()}>
+                    {loading ? (
+                      <Spinner size="small" />
+                    ) : (
+                      <ButtonText fontSize={18} fontFamily="Inter Semibold">
+                        Cadastrar
+                      </ButtonText>
+                    )}
+                  </Button>
+
+                  <Box marginTop={37} h={1} w={160} bgColor="#8a2be2"></Box>
+                  <Text
+                    marginTop={17}
+                    fontSize={18}
+                    fontFamily="Inter Regular"
+                    underline={true}
+                    color="#8a2be2"
+                  >
+                    Já possui conta?{' '}
+                    <Text
+                      fontSize={18}
+                      fontFamily="Inter Regular"
+                      underline={false}
+                    >
+                      Clique abaixo.
+                    </Text>
+                  </Text>
+                  <Button
+                    marginTop={20}
+                    marginBottom={22}
+                    w="50%"
+                    variant="outline"
+                    borderColor="#8a2be2"
+                    onPress={() => navigation.navigate('Login')}
+                  >
+                    <ButtonText
+                      color="#8a2be2"
+                      fontSize={18}
+                      fontFamily="Inter Semibold"
+                    >
+                      Fazer Login
+                    </ButtonText>
+                  </Button>
+                </Center>
+              </VStack>
             </VStack>
-          </VStack>
-        </Center>
-      </FormControl>
+          </Center>
+        </FormControl>
+      </ImageBackground>
     </Box>
   );
 };
