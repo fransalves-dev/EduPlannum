@@ -1,5 +1,5 @@
-import { faBell, faFolderOpen } from '@fortawesome/free-regular-svg-icons';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { faBook } from '@fortawesome/free-solid-svg-icons/faBook';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import {
   Box,
@@ -7,55 +7,48 @@ import {
   ButtonText,
   Image,
   ImageBackground,
-  ScrollView,
   Text,
 } from '@gluestack-ui/themed';
 import React, { useContext, useEffect, useState } from 'react';
-import { FolderResponse } from '../../types/foldersProp';
+import { ScrollView } from 'react-native';
+import { ReminderResponse } from '../../types/remindersProps';
 import { RouterProps } from '../../types/routerProps';
 import { Background, ChatImage } from '../assets/images';
-import CardFolder from '../components/folders/CardFolders';
-import ModalFolderAdd from '../components/folders/ModalFolderAdd';
-import ModalFolderDelete from '../components/folders/ModalFolderDelete';
-import ModalFolderUpdate from '../components/folders/ModalFolderUpdate';
 import Header from '../components/Header';
+import CardReminder from '../components/reminders/CardReminder';
+import ModalReminderAdd from '../components/reminders/ModalReminderAdd';
+import ModalReminderDelete from '../components/reminders/ModalReminderDelete';
 import { CourseContext } from '../context/CourseContext';
-import { FolderContext } from '../context/FolderContext';
+import { ReminderContext } from '../context/ReminderContext';
 import { UserContext } from '../context/UserContext';
-import { useFolders } from '../hooks/folders';
-
-const Folders = ({ navigation }: RouterProps) => {
+import { useReminders } from '../hooks/reminders';
+const Reminders = ({ navigation }: RouterProps) => {
   const { user } = useContext(UserContext);
+  const { reminders, setReminders, reminderSelected, setReminderSelected } =
+    useContext(ReminderContext);
   const { courseSelected, setCourseSelected } = useContext(CourseContext);
-  const { folders, setFolders, folderSelected, setFolderSelected } =
-    useContext(FolderContext);
 
   if (!user) {
     return;
   }
-  if (!courseSelected) {
+  if (courseSelected === null) {
     return;
   }
   const {
-    data: folderData,
+    data: remindersData,
     error,
     isLoading,
-  } = useFolders(user.uid, courseSelected?.id);
+  } = useReminders(user.uid, courseSelected.id);
   useEffect(() => {
-    if (folderData) {
-      setFolders(folderData);
+    if (remindersData) {
+      setReminders(remindersData);
     }
-  }, [folderData, setFolders]);
+  }, [remindersData, setReminders]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showDeleteModal, setDeleteModal] = useState(false);
-  const [showUpdateModal, setUpdateModal] = useState(false);
-  const handleDelete = (folder: FolderResponse) => {
-    setFolderSelected(folder);
+  const handleDelete = (reminder: ReminderResponse) => {
+    setReminderSelected(reminder);
     setDeleteModal(true);
-  };
-  const handleUpdate = (folder: FolderResponse) => {
-    setFolderSelected(folder);
-    setUpdateModal(true);
   };
   return (
     <ImageBackground source={Background} h="100%">
@@ -66,8 +59,7 @@ const Folders = ({ navigation }: RouterProps) => {
               w={30}
               bg="transparent"
               onPress={() => {
-                setCourseSelected(null);
-                navigation.navigate('Matérias');
+                navigation.navigate('Pastas');
               }}
             >
               <FontAwesomeIcon
@@ -76,17 +68,18 @@ const Folders = ({ navigation }: RouterProps) => {
                 style={{ color: '#8a2be2' }}
               />
             </Button>
-            <Box w={200} flexDirection="row" alignItems="flex-end">
+            <Box w={150} flexDirection="row" alignItems="flex-end">
               <Text
                 fontSize={27}
                 fontWeight="bold"
                 fontFamily="Inter Bold"
                 color="#F5F5DC"
+                marginRight={5}
               >
-                Pastas de {courseSelected.name}
+                Lembretes de {courseSelected.name}
               </Text>
               <FontAwesomeIcon
-                icon={faFolderOpen}
+                icon={faBook}
                 size={30}
                 style={{ color: '#8a2be2' }}
               />
@@ -99,50 +92,34 @@ const Folders = ({ navigation }: RouterProps) => {
           flexDirection: 'column',
           justifyContent: 'space-between',
           marginHorizontal: 20,
-          minHeight: '84%',
+          minHeight: '86%',
         }}
       >
-        {folders?.length === 0 || folders === null ? (
+        {reminders?.length === 0 || reminders === null ? (
           <Text
             fontSize={20}
             fontFamily="Inter Regular"
             color="#F5F5DC"
             marginLeft={5}
           >
-            Nenhuma pasta...
+            Nenhum lembrete...
           </Text>
         ) : (
           <Box>
-            {folders.map((folder) => {
+            {reminders.map((reminder) => {
               return (
-                <CardFolder
-                  key={folder.id}
-                  folder={folder}
+                <CardReminder
+                  key={reminder.id}
+                  reminder={reminder}
                   onPress={() => {
-                    navigation.navigate('Arquivos');
-                    setFolderSelected(folder);
+                    navigation.navigate('Pastas');
                   }}
-                  onDelete={() => handleDelete(folder)}
-                  onUpdate={() => handleUpdate(folder)}
+                  onDelete={() => handleDelete(reminder)}
                 />
               );
             })}
           </Box>
         )}
-        <Button h={50} bgColor="#8a2be2">
-          <ButtonText
-            fontSize={22}
-            fontWeight="bold"
-            fontFamily="Inter Bold"
-            color="white"
-            marginRight={5}
-            onPress={() => navigation.navigate('Lembretes')}
-          >
-            Lembretes
-          </ButtonText>
-          <FontAwesomeIcon icon={faBell} size={22} style={{ color: 'white' }} />
-        </Button>
-
         <Box marginTop={20}>
           <Box
             marginHorizontal={20}
@@ -172,27 +149,16 @@ const Folders = ({ navigation }: RouterProps) => {
           </Box>
         </Box>
       </ScrollView>
-
-      <ModalFolderAdd
+      <ModalReminderAdd
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
         course={courseSelected}
       />
-      {folderSelected ? (
-        <ModalFolderDelete
+      {reminderSelected ? (
+        <ModalReminderDelete
           isOpen={showDeleteModal}
           onClose={() => setDeleteModal(false)}
-          folder={folderSelected}
-        />
-      ) : (
-        <></>
-      )}
-
-      {folderSelected ? (
-        <ModalFolderUpdate
-          isOpen={showUpdateModal}
-          onClose={() => setUpdateModal(false)}
-          folder={folderSelected}
+          reminder={reminderSelected}
         />
       ) : (
         <></>
@@ -201,4 +167,4 @@ const Folders = ({ navigation }: RouterProps) => {
   );
 };
 
-export default Folders;
+export default Reminders;

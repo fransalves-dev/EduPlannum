@@ -23,13 +23,13 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useState } from 'react';
 import { FIREBASE_AUTH } from '../../FirebaseConfig';
 import { RouterProps } from '../../types/routerProps';
+import { Background, Logo } from '../assets/images';
 
 const LoginPage = ({ navigation }: RouterProps) => {
-  var Logo = require('../assets/img/Logo_Novo.png');
-  var Background = require('../assets/img/Background_Novo.png');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+
   const auth = FIREBASE_AUTH;
   const [showPassword, setShowPassword] = useState(false);
   const handleState = () => {

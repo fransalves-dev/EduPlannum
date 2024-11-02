@@ -4,67 +4,58 @@ import {
   Box,
   Button,
   ButtonText,
-  CloseIcon,
-  Heading,
-  Icon,
-  Modal,
-  ModalBackdrop,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ScrollView,
+  Image,
+  ImageBackground,
   Text,
 } from '@gluestack-ui/themed';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import React, { useEffect, useRef, useState } from 'react';
-import { FIREBASE_AUTH } from '../../FirebaseConfig';
-import { CourseObjectResponse } from '../../types/coursesProps';
+import React, { useContext, useEffect, useState } from 'react';
+import { ScrollView } from 'react-native';
+import { CourseResponse } from '../../types/coursesProps';
 import { RouterProps } from '../../types/routerProps';
-import CardGeneral from '../components/CardGeneral';
+import { Background, ChatImage } from '../assets/images';
+import CardGeneral from '../components/courses/CardGeneral';
+import ModalCourseAdd from '../components/courses/ModalCourseAdd';
+import ModalCourseDelete from '../components/courses/ModalCourseDelete';
+import ModalCourseUpdate from '../components/courses/ModalCourseUpdate';
 import Header from '../components/Header';
-import { fetchCourses } from '../services/courses-api';
-
+import { CourseContext } from '../context/CourseContext';
+import { UserContext } from '../context/UserContext';
+import { useCourses } from '../hooks/courses';
 const Courses = ({ navigation }: RouterProps) => {
-  let userUid = FIREBASE_AUTH.currentUser?.uid;
-
-  const [showModal, setShowModal] = useState(false);
-  const ref = useRef(null);
-  const queryClient = useQueryClient();
-  const [courses, setCourses] = useState<CourseObjectResponse>(
-    [] as unknown as CourseObjectResponse
-  );
-  if (userUid === undefined) {
-    return <Text>Tivemos um erro</Text>;
+  const { user } = useContext(UserContext);
+  const { courses, setCourses, setCourseSelected, courseSelected } =
+    useContext(CourseContext);
+  if (!user) {
+    return;
   }
-
-  const {
-    data: coursesData,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ['courses', userUid],
-    queryFn: () => fetchCourses(userUid),
-  });
+  const { data: coursesData, error, isLoading } = useCourses(user.uid);
   useEffect(() => {
     if (coursesData) {
       setCourses(coursesData);
-      console.log(courses);
     }
-  }, [coursesData]);
-  console.log(coursesData);
-
+  }, [coursesData, setCourses]);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showDeleteModal, setDeleteModal] = useState(false);
+  const [showUpdateModal, setUpdateModal] = useState(false);
+  const handleDelete = (course: CourseResponse) => {
+    setCourseSelected(course);
+    setDeleteModal(true);
+  };
+  const handleUpdate = (course: CourseResponse) => {
+    setCourseSelected(course);
+    setUpdateModal(true);
+  };
   return (
-    <Box bgColor="#284060" h="100%">
+    <ImageBackground source={Background} h="100%">
       <Header
         LeftComponent={
           <>
             <Text
-              fontSize={21}
+              fontSize={27}
               fontWeight="bold"
-              color="#212121"
-              marginRight={2}
+              fontFamily="Inter Bold"
+              color="#F5F5DC"
+              marginRight={5}
             >
               Matérias
             </Text>
@@ -76,84 +67,99 @@ const Courses = ({ navigation }: RouterProps) => {
           </>
         }
       />
-      <ScrollView paddingHorizontal={20}>
-        <CardGeneral
-          mainTitle="Matemática"
-          secondaryTitle="Segunda-Feira"
-          numberFolders={4}
-          numberReminders={2}
-          mode="course"
-          onPress={() => navigation.navigate('Pastas')}
-        />
-
-        <Box
-          paddingBottom={30}
-          flexDirection="row"
-          justifyContent="space-between"
-        >
-          <Button
-            w={69}
-            h={66}
-            borderRadius={100}
-            bgColor="#8a2be2"
-            onPress={() => setShowModal(true)}
-            ref={ref}
+      <ScrollView
+        contentContainerStyle={{
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          marginHorizontal: 20,
+          minHeight: '86%',
+        }}
+      >
+        {courses?.length === 0 || courses === null ? (
+          <Text
+            fontSize={20}
+            fontFamily="Inter Regular"
+            color="#F5F5DC"
+            marginLeft={5}
           >
-            <ButtonText fontSize={34}>+</ButtonText>
-          </Button>
-          <Button w={69} h={66} borderRadius={100} bgColor="#8a2be2">
-            <ButtonText fontSize={34}>c</ButtonText>
-          </Button>
+            Nenhuma matéria...
+          </Text>
+        ) : (
+          <Box>
+            {courses.map((course) => {
+              return (
+                <CardGeneral
+                  key={course.id}
+                  mainTitle={course.name}
+                  secondaryTitle={course.day_week}
+                  numberFolders={course.number_folder}
+                  numberReminders={course.number_reminder}
+                  onPress={() => {
+                    navigation.navigate('Pastas');
+                    setCourseSelected(course);
+                  }}
+                  onDelete={() => handleDelete(course)}
+                  onUpdate={() => handleUpdate(course)}
+                />
+              );
+            })}
+          </Box>
+        )}
+
+        <Box marginTop={20}>
+          <Box
+            marginHorizontal={20}
+            flexDirection="row"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Button
+              marginLeft={15}
+              w={69}
+              h={69}
+              alignItems="center"
+              borderRadius={100}
+              bgColor="#8a2be2"
+              onPress={() => setShowAddModal(true)}
+            >
+              <ButtonText fontSize={40}>+</ButtonText>
+            </Button>
+
+            <Button
+              bgColor="transparent"
+              h={90}
+              onPress={() => navigation.navigate('Chat')}
+            >
+              <Image source={ChatImage} h={100} w={90} alt="Logo Pequena" />
+            </Button>
+          </Box>
         </Box>
       </ScrollView>
-      <Modal
-        isOpen={showModal}
-        onClose={() => {
-          setShowModal(false);
-        }}
-        finalFocusRef={ref}
-      >
-        <ModalBackdrop />
-        <ModalContent>
-          <ModalHeader>
-            <Heading size="lg">Engage with Modals</Heading>
-            <ModalCloseButton>
-              <Icon as={CloseIcon} />
-            </ModalCloseButton>
-          </ModalHeader>
-          <ModalBody>
-            <Text>
-              Elevate user interactions with our versatile modals. Seamlessly
-              integrate notifications, forms, and media displays. Make an impact
-              effortlessly.
-            </Text>
-          </ModalBody>
-          <ModalFooter>
-            <Button
-              variant="outline"
-              size="sm"
-              action="secondary"
-              mr="$3"
-              onPress={() => {
-                setShowModal(false);
-              }}
-            >
-              <ButtonText>Cancel</ButtonText>
-            </Button>
-            <Button
-              size="sm"
-              action="positive"
-              borderWidth="$0"
-              onPress={() => {
-                setShowModal(false);
-              }}
-            >
-              <ButtonText>Explore</ButtonText>
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-    </Box>
+
+      <ModalCourseAdd
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+      />
+      {courseSelected ? (
+        <ModalCourseDelete
+          isOpen={showDeleteModal}
+          onClose={() => setDeleteModal(false)}
+          course={courseSelected}
+        />
+      ) : (
+        <></>
+      )}
+
+      {courseSelected ? (
+        <ModalCourseUpdate
+          isOpen={showUpdateModal}
+          onClose={() => setUpdateModal(false)}
+          course={courseSelected}
+        />
+      ) : (
+        <></>
+      )}
+    </ImageBackground>
   );
 };
 

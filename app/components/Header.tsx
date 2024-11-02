@@ -10,10 +10,10 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ LeftComponent }) => {
   return (
     <Box
-      bg="#F5F5DC"
-      paddingHorizontal={20}
+      bgColor="#284060"
+      paddingHorizontal={25}
       paddingTop={45}
-      paddingBottom={10}
+      paddingBottom={20}
       display="flex"
       flexDirection="row"
       justifyContent="space-between"
@@ -26,12 +26,12 @@ const Header: React.FC<HeaderProps> = ({ LeftComponent }) => {
         <Button
           onPress={() => FIREBASE_AUTH.signOut()}
           bgColor="transparent"
-          w={40}
+          w={57}
         >
           <FontAwesomeIcon
             icon={faCircleUser}
-            size={40}
-            style={{ color: '#8a2be2' }}
+            size={57}
+            style={{ color: '#F5F5DC' }}
           />
         </Button>
       </Center>

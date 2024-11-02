@@ -23,13 +23,13 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import React, { useState } from 'react';
 import { FIREBASE_AUTH } from '../../FirebaseConfig';
 import { RouterProps } from '../../types/routerProps';
+import { Background, Logo } from '../assets/images';
 const SignUpPage = ({ navigation }: RouterProps) => {
-  var Logo = require('../assets/img/Logo_Novo.png');
-  var Background = require('../assets/img/Background_Novo.png');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
   const handleState = () => {
     setShowPassword((showState) => {
       return !showState;
@@ -45,7 +45,6 @@ const SignUpPage = ({ navigation }: RouterProps) => {
         email,
         password
       );
-      console.log('Deu bom' + response);
     } catch (error: any) {
       console.log('Deu erro' + error);
       alert('Erro no login: ' + error.message);
